@@ -1,0 +1,116 @@
+Node.js
+
+
+1. All users sending requests to a node server are picked by just the one thread. Thus, we cannot afford to block this thread. Hence the term non blocking.
+2. You cannot require a package that is written is esmodule. Can we import a package that is used in commons
+3. V8 is written in C++ ???? Node is a C++ program
+4. V8 converts js to machine code
+5. V8 has to implement ecmascript specification in C++/C
+6. V8 can run standalone, or can be embedded into any C++ application, meaning extend the feature of javascript in your own ways.
+7. Javscript inherently does not have ability to read and write to a file. But C++ has that ability. So you can transfer the same to javascript. How cool is that.
+8. So Node.js is a c++ program, that has embedded V8, another C++ program, that has added a wealth of features, that makes js suitable to be a server technology.
+9. Similarly google chrome also improvises upon this v8 engine to make available features like Ajax, DOM manipulation that are outside ECMA specification.
+10. Client - asks for services to be done, Server - performs these services. Feign client is a Http client meaning it….
+
+
+1. Now what does javacsript need to be a server side technology ?
+2. Better organise files, read/write to files, ways to deal with db, communicate over the internet, http capabilities, socket capabilities
+3. So node.js has to implement all this features to be able to use javascript on the server
+4. Ryan Dahl working at joyent created Node.js and also Deno. Created node.js meaning took V8 and extend its features using c++.
+5. Node.js provides a runtime environment for executing JavaScript code outside of a browser, enabling server-side development.
+6. But there is also pure js files within node.js. Now what are these for ? Basically these are wrapper for the underlying C++ feature itself. So internally these js files are using a c++ functionality inside of the js code.
+
+
+
+SO V8 and node are basically C++ programs that understand your javascript code and convert the same to machine code.
+
+
+Modules, Exports and Require
+
+1. Modules were not inherently supported by js until ES6. But node before ES6 wanted to support modules
+2. commonjs modules - a set of standards for how js code modules should be structured and used
+3. require() is a function that node makes available inside its javascript core i.e set of js functions inside node codebase that internally bind to C++ implementations
+4. require will give you back whatever you attach to module.exports = whatever
+5. require, module, __dirname, __filename are just global variables made available by the node. They are part of javascript core in node codebase
+6. Object literal - use curly braces and specify key value pairs
+7. In IIFE, only code inside of IIFE is protected. But IIFE itself can access variables declared outside of it.
+8. Modules — IIFE   
+9. require function returns module.exports. So unless you attach the code that u want to export to module.exports, it will nit be available for use inside another js file.
+10. require function only runs once even if u call it multiple times just like import. So the code in the module is executed only once.
+
+exports = function() {}exports.greet = function() {}
+
+11. you can use both require() and import in Node.js, while you are limited to import in the browser.
+
+
+Node Events
+
+
+1. 2 types of events - system events coming from C++ code libuv. This is the code the emits these events. i.e received request from internet, finished reading file
+2. Custom events - Inside the javascript core. Events that you create for yourself. This is not a C++ code but a javascript code emitting the events. There is a wrapper in javascript core of the node.js i.e events.js that is a wrapper around both the libuv events and custom events and help us subscribe to these. 
+3. An event is an object. All event objects in node inherit the Emitter class. So all events objects have on and emit methods, meaning you can listen to almost all the events using the on method.
+4. utils.inherits(myObject, objecThatMyObjectInherits)
+5. Arrow functions don't have their own bindings to this, arguments, or super, and should not be used as methods.
+6. Arrow functions cannot be used as constructors. Calling them with new throws a TypeError.
+7. For similar reasons, the call(), apply(), and bind() methods are not useful when called on arrow functions.
+8. function ConstructorFunction() {} - ConstructorFunction.call() will basically call the constructor function
+9. Remember, a class is nothing but a syntactic sugar for a fucntion constructor. So you can export classes also and create objects of that class in another modules.
+10. libuv is a c library. It is the interface b/w sys call and v8. Ops that need syscall like opening a TCP socket, read and write to file system 
+11. libuv has event loop code that constantly check the queue. libuv —> requests OS —> OS when done pushes event to queue —> libuv runs event loop to keep checking the queue —> process events in queue —> calls the js callback binder to that C++ event in V8
+12. I/O — opening files connecting to databases, network calls
+13.  Event loop is nothing but a while loop that constantly that keeps checkign the queues looking for events to process.
+
+
+Async I/O
+
+1. What is an async op - Operation that takes time like reading a file, making a network call, creating db connection. Synchronous code is one instruction executes only after the completion of the previous instruction. It is dependent on the state of completion of the previous instruction. Whereas asynchronous operation is independent. It need not wait to begin executing. So in js, sync ops execute on the main thread.
+2. Event Driven Mode - So whenever the asynchronous operation is completed, an event is emitted and the event queue keeps track of such events. The event loop processes these events and runs the associated callback.
+3. Libuv is the code that handles asynchronous ops. Whenever an asynchronous code is encountered, node offloads it to libuv takes care of such code. It takes it out of the main thread and executes in the background on worker threads. So it allows node to continue processing other instructions without blocking the main thread. So node need not wait for the async task to complete to execute the next instruction. So while your asynchronous task is running, node continues to process other instructions.
+4. Buffer - A temporary holding spot for data in memory. Limited in size.
+5. Stream - A sequence of data made broken up into chunks and made available over time. These sequence combine to form a whole single piece of data. Ex. Stream of mp4 bytes streaming a movie.
+6. These streams of data comes in buffer sizes.  ACLJDN ACLJDN ACLJDN ACLJDN ACLJDN. They are stored in a buffer while the previous batch is processed.
+7. Everything we store and process in the computer is numbers the are represented in binary. So ultimately all characters, alphabets etc. are converted to numbers and binary.
+8. Character set is a set of characters represented as numbers. Each character is assigned a number. Based on what number you give to a character, you have different character sets. But most popular is unicode.
+9. Character encoding means how many bits are used to store these numbers in binary. You can use  8, 16, 32.  UTF-8 is the most widely used because it uses 8 bits to represent a number and there by the character.
+10. The buffer is created on the c++ side of the node core and then made available to the js side. So the c++ code is the one that is interacting with memory using sys calls.
+11. const but = new Buffer(‘Hello’, ‘utf8’) —> This will store the string Hello in binary in utf-8 encoding. Now you can get a result back as type buffer from some operation. Then you need to be knowing how to convert this back to the corresponding character or number. Just like java streams
+12. Why we need buffers because js did not have any methods to deal with binary data. i.e to convert something to binary representation.
+13. Files - Buffers - Async code - callbacks - libuv are all dependent concepts.
+14. Libuv's event loop actually operates similarly to Chrome's event loop, with the concept of an event queue and callbacks for asynchronous I/O operations. It uses the libuv library to handle asynchronous I/O operations and delegate tasks to worker threads when necessary, enabling better use of multi-core processors.
+15. Class Stream extends EventEmitter. A Stream is just a Base abstract class.It only has some base methods that all Streams should need. Many other types of Stream classes are built on top this, like a ReadableStream, WritableStream, Duplex etc. All of these inherit from Stream and implement their own methods.
+16. Pipes -  Used to chain streams. i.e connect 2 or more streams. Process data from Readable stream and then pipe to a writable stream and so on.
+17. File data is not the only thing that could be streamed. You can stream data to anything that is a stream like a TCP connection is a stream.
+
+So why Streams ?
+
+It is the node way of thinking about data. Node likes dealing with streams to be performant since there is smaller memory footprint.
+So whenever you are dealing with data your first instinct should be towards using async streams. This will help have better performance.
+
+HTTP and being a Web Server
+
+1. Protocol = set of rules two sides agree in order to get some work done. 
+2. The browser has to open a TCP/IP socket with the server to communicate with the server. Within this socket, information could be further structured as per diff protocols like HTTP, FTP, SMTP etc and sent over the socket to the server.
+3. So node has abstractions with the OS to open and close these sockets for communication. So node does not only support http protocol i.e web server, it can also be used to build a mail server, file server etc.
+4. HTTP - Its a format for sending data on the World Wide Web. i.e It should have headers, payload, method etc.
+CONNECT www.google.com:443 HTTP / 1.1
+Host: www.google.com
+Headers:
+Connection: Keep-alive
+
+Content-type - The type of data being sent from the server. Ex: application/json text/html image/jpeg
+
+
+
+
+5. http_parser is code that parses the incoming http request and makes available all the data like the headers in the form of a js object
+6. res - This is a writable stream. Meaning you can use it as a stream to send data to the browser
+7. ^ vs ˜  in semantic versioning
+8. Env variables - Global variables specific to that environment (server) in which our code is living in. We can access these values in our code.
+9. Middleware - Code that sits b/w 2 layers of software. In express, middleware sits b/w the request and response. We can have multiple middlewares. One middleware handing out to another.
+10. Cookies are little pieces of information (key values pairs) that sits in the browser and gets sent along with every http request made to the server and you can parse them on the server.
+11. You can appreciate the MVC pattern when you build an app that will handle both apis and html. All the apis are in controller folder, views are in views, and models that deal with db are in db 
+
+Databases and Node
+
+1. There is a need for an interface that can communicate with db and get the required data in abstracted manner just like JPA. Solving the problem of how to get relational data in db as a POJO or a JSON object
+2. Why nosql came about ? Making frequent changes to data models in a relational database is a cumbersome process. If you want to add a new field to a table, then code changes needed is more. But its easier in nosql.
